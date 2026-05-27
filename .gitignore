@@ -1,0 +1,16 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.idea/
+.venv/
+venv/
+
+# Downloaded datasets and local artifacts
+data/
+*.pt
+*.pth
+*.pkl
+*.png
+*.jpg
+*.jpeg
+
