@@ -1,3 +1,4 @@
+import { PAGES, pageDocument } from './pages.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -8,7 +9,8 @@ const server = createServer(async (req, res) => {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
     const file = resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));
     if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
-    const data = await readFile(file);
+    const page = PAGES.find(page => file === resolve(root, page.file));
+    const data = page ? pageDocument(await readFile(resolve(root, 'index.html'), 'utf8'), page) : await readFile(file);
     res.writeHead(200, {'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control':'no-store'}).end(data);
   } catch { res.writeHead(404).end('Not found'); }
 });

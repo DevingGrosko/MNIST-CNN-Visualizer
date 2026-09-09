@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b111d">
+  <meta name="theme-color" content="#f5f3ed">
   <meta name="description" content="Look inside a real convolutional neural network. Draw a digit, explore every feature map, inspect the matrix math, and watch backpropagation update the weights.">
   <title>CNN, Explained — An interactive neural network lab</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body data-page="overview">
   <a class="skip-link" href="#workspace">Skip to visualizer</a>
-  <header class="site-header"><a class="brand" href="./"><img src="./favicon.svg" alt="" width="34" height="34"><span>CNN<span class="brand-comma">,</span> Explained<span class="brand-dot">.</span></span></a><nav aria-label="Main navigation"><a class="active" href="#workspace">The visualizer</a><a href="#guide">Field guide</a><a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer" target="_blank" rel="noreferrer">View source <span aria-hidden="true">↗</span></a></nav><span class="header-note">A look beneath the prediction</span></header>
-  <main id="workspace">
-    <div class="intro"><div><p class="eyebrow"><span class="live-dot"></span> INTERACTIVE LEARNING LAB</p><h1>See what a neural network sees.</h1><p class="intro-copy">One handwritten digit. Every layer, every calculation, every connection.</p></div><button class="button primary" id="start-tour"><span aria-hidden="true">▷</span> Walk me through it</button></div>
-    <div class="model-bar"><div class="model-name"><span class="tag">YOUR MODEL</span><span>MNIST CNN</span><span class="subtle">2 conv blocks · 103,018 parameters</span></div><div class="model-switch"><span class="subtle">Weights</span><div class="segmented" role="group" aria-label="Model weights"><button id="trained" class="selected" aria-pressed="true">Trained</button><button id="untrained" aria-pressed="false">Untrained</button></div><span id="accuracy" class="accuracy">Loading model…</span></div></div>
+  <header class="site-header"><a class="brand" href="./index.html" data-route="overview"><img src="./favicon.svg" alt="" width="34" height="34"><span>CNN<span class="brand-comma">,</span> Explained<span class="brand-dot">.</span></span></a><nav aria-label="Main navigation"><a href="./index.html" data-route="overview">The network</a><a href="./input.html" data-route="input">The lessons</a><a href="./guide.html" data-route="guide">Field notes</a><a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer" target="_blank" rel="noreferrer">View source <span aria-hidden="true">↗</span></a></nav><span class="header-note">A practical introduction to convolution</span></header>
+  <div class="book-layout"><aside class="book-sidebar"><p class="sidebar-label">CONTENTS</p><a class="overview-link" href="./index.html" data-route="overview">The whole network <span>↗</span></a><nav class="stage-nav" id="stage-nav" aria-label="Lesson pages"></nav><a class="notes-link" href="./guide.html" data-route="guide">Field notes <span>↗</span></a><p class="sidebar-foot">Same image. Same model.<br>A different view at every step.</p></aside><main id="workspace">
+    <div class="intro"><div><p class="eyebrow" id="page-eyebrow">AN INTERACTIVE TEXTBOOK / OVERVIEW</p><h1 id="page-title" tabindex="-1">A digit, taken apart.</h1><p class="intro-copy" id="page-deck">Draw something. Then follow the numbers from the first pixel to the final prediction.</p></div><a class="button primary" id="start-tour" href="./input.html" data-route="input">Start with a pixel <span aria-hidden="true">→</span></a></div>
+    <div class="model-bar"><div class="model-name"><span class="tag">MNIST</span><span>MNIST CNN</span><span class="subtle">2 conv blocks · 103,018 parameters</span></div><div class="model-switch"><span class="subtle">Weights</span><div class="segmented" role="group" aria-label="Model weights"><button id="trained" class="selected" aria-pressed="true">Trained</button><button id="untrained" aria-pressed="false">Untrained</button></div><span id="accuracy" class="accuracy">Loading model…</span></div></div>
     <div id="load-error" class="error" role="alert" hidden></div>
     <div id="loading" class="loading"><span class="spinner"></span> Loading the model and MNIST examples. Every calculation runs in your browser.</div>
     <div id="lab" hidden>
-      <section class="lab-grid" aria-label="Live neural network">
+      <section id="overview-page" class="lab-grid" aria-label="Live neural network">
         <div class="panel input-panel"><div class="panel-heading"><h2><span class="section-number">01</span> The input</h2><span class="mono subtle">28 × 28</span></div>
           <div class="input-tabs segmented" role="group" aria-label="Image source"><button id="sample-mode" class="selected" aria-pressed="true">MNIST sample</button><button id="draw-mode" aria-pressed="false">Draw a digit</button></div>
           <div class="input-canvas-wrap"><canvas id="input-canvas" width="280" height="280" role="img" aria-label="Input digit as a 28 by 28 grayscale image"></canvas><canvas id="draw-canvas" width="280" height="280" hidden aria-label="Draw one digit from zero to nine" tabindex="0"></canvas><span class="canvas-corner">x ∈ [0, 1]</span></div>
@@ -32,15 +32,16 @@
         </div>
         <div class="panel prediction-panel"><div class="panel-heading"><h2><span class="section-number">03</span> The prediction</h2><span class="mono subtle">10 classes</span></div><div class="prediction-hero"><span id="predicted-digit">–</span><div><span class="subtle small">The network thinks</span><strong id="prediction-percent">—</strong><span class="small subtle">softmax probability</span></div></div><div id="probabilities" class="probabilities" aria-label="Probability for each digit"></div><p id="prediction-note" class="prediction-note"></p><div class="prediction-foot">A high probability is a model score, not a guarantee.</div></div>
       </section>
-      <section class="explorer" aria-labelledby="explorer-title"><div class="explorer-title"><div><p class="eyebrow">LAYER EXPLORER</p><h2 id="explorer-title">Slow it down. Look closer.</h2></div><div class="journey-controls"><span id="step-count" class="mono subtle"></span><button class="icon-button" id="previous-step" aria-label="Previous lesson">←</button><button class="icon-button" id="next-step" aria-label="Next lesson">→</button></div></div>
-        <nav class="stage-nav" id="stage-nav" aria-label="Steps through the network"></nav>
+      <section class="explorer" id="lesson-page" aria-label="Current lesson">
+        <div class="image-context"><canvas id="context-image" width="56" height="56" role="img" aria-label="Current input digit"></canvas><div><span class="context-label">CURRENT IMAGE</span><span id="context-caption"></span></div><label>Example <select id="context-sample" aria-label="Choose an example digit"></select></label><a href="./index.html" data-route="overview" class="text-button">Draw or upload ↗</a><div class="context-result"><span class="context-label">PREDICTION</span><span id="context-prediction"></span></div></div>
         <div id="lesson" class="lesson"></div>
+        <nav class="page-turner" aria-label="Previous and next lesson"><a id="previous-step" href="./index.html"></a><span id="step-count" class="mono subtle"></span><a id="next-step" href="./conv1.html"></a></nav>
       </section>
       <section id="guide" class="guide"><div class="guide-heading"><p class="eyebrow">THE FIELD GUIDE</p><h2>The ideas behind the numbers.</h2><p>A little context for the things you just watched happen.</p></div><div id="guide-content" class="guide-content"></div></section>
-      <section class="model-details"><div><p class="eyebrow">BUILT FROM THE ORIGINAL</p><h2>Your PyTorch model, made explorable.</h2><p>This lab follows Devin Grosko’s <a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer/blob/main/ForwardStep.py" target="_blank" rel="noreferrer">Forward architecture</a> and the inspection ideas in <a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer/blob/main/Probe.py" target="_blank" rel="noreferrer">Probe.py</a>. The browser calculates the full forward pass, exposing the intermediate tensors instead of hiding them.</p></div><dl id="model-facts"></dl></section>
+      <section class="model-details" id="about-model"><div><p class="eyebrow">BUILT FROM THE ORIGINAL</p><h2>Your PyTorch model, made explorable.</h2><p>This lab follows Devin Grosko’s <a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer/blob/main/ForwardStep.py" target="_blank" rel="noreferrer">Forward architecture</a> and the inspection ideas in <a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer/blob/main/Probe.py" target="_blank" rel="noreferrer">Probe.py</a>. The browser calculates the full forward pass, exposing the intermediate tensors instead of hiding them.</p></div><dl id="model-facts"></dl></section>
     </div>
-  </main>
-  <footer><a class="brand" href="./">CNN, Explained.</a><p>Made to turn “it predicts” into “I understand.”</p><a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer" target="_blank" rel="noreferrer">Devin Grosko · Source code ↗</a></footer>
+  </main></div>
+  <footer><a class="brand" href="./index.html" data-route="overview">CNN, Explained.</a><p>Read the image. Follow the arithmetic.</p><a href="https://github.com/DevingGrosko/MNIST-CNN-Visualizer" target="_blank" rel="noreferrer">Devin Grosko · Source code ↗</a></footer>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
   <script type="module" src="./app.js"></script>
 </body></html>
