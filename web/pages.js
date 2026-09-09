@@ -12,7 +12,7 @@ export const PAGES = [
   { id: 'dense', file: 'dense.html', step: 8, title: 'What goes into one neuron?', label: 'The dense layer', deck: 'Connect all 784 features to a hidden neuron. Inspect the signed contributions and their running sum.' },
   { id: 'logits', file: 'logits.html', step: 9, title: 'One score for each possible digit.', label: 'Class scores', deck: 'The 128 hidden activations vote through learned weights. Follow their contributions to each of ten logits.' },
   { id: 'softmax', file: 'softmax.html', step: 10, title: 'From ten scores to a distribution.', label: 'Softmax', deck: 'Subtract the maximum, exponentiate, and normalize. Watch the ten probabilities divide up the same whole.' },
-  { id: 'learn', file: 'learning.html', step: 11, title: 'Send the error back through the network.', label: 'Learning & gradients', deck: 'Give the image a label. Trace the derivatives backward, then take a real step that changes the weights.' },
+  { id: 'learn', file: 'learning.html', step: 11, title: 'Watch the network learn.', label: 'The training movie', deck: 'Every filter. Every gradient. Real updates, one scene at a time. Watch once, then follow the matrices through ten lessons.' },
   { id: 'guide', file: 'guide.html', title: 'The ideas behind the arithmetic.', label: 'Field notes', deck: 'A reference for channels, receptive fields, weight sharing, and what a prediction can—and cannot—tell you.' },
 ];
 export const pageForStep = step => PAGES.find(page => page.step === step);

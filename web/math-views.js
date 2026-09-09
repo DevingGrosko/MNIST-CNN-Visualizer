@@ -1,5 +1,5 @@
 import { convolutionCell } from './engine.js';
-import { productTrace, groupedContributions, softmaxTrace, chainForOutputWeight } from './math-trace.js';
+import { productTrace, groupedContributions, softmaxTrace } from './math-trace.js';
 import { $, $$, f, pct, heatmap, mapEvents, options, color } from './render.js';
 
 const termMatrix = (values, title, kind, padding=[]) => `<div class="worked-matrix"><p class="matrix-title">${title}</p><div class="matrix" style="grid-template-columns:repeat(3,1fr)">${values.map((value,index)=>`<button class="matrix-cell ${value<0?'negative':value===0?'zero':''} ${padding[index]?'padded':''}" data-term="${index}" data-kind="${kind}" aria-label="${title}, row ${Math.floor(index/3)}, column ${index%3}, value ${value}"><small>${Math.floor(index/3)},${index%3}</small><span>${f(value,3)}</span></button>`).join('')}</div></div>`;
@@ -93,9 +93,9 @@ export function enhanceDense(app) {
   const selected=trace.terms[s.connection];
   const work=$('#lesson-work');
   const table=$('.table-scroll',work);
-  if(table){const detail=document.createElement('details');detail.className='all-connections';detail.innerHTML=`<summary>Inspect all ${n} connections as a table</summary>`;table.replaceWith(detail);detail.append(table);}
+  if(table){const detail=document.createElement('section');detail.className='all-connections';detail.innerHTML=`<h4>All ${n} connections</h4>`;table.replaceWith(detail);detail.append(table);}
   const grid=$('.dense-grid',work);
-  if(grid){const detail=document.createElement('details');detail.className='all-neurons';detail.innerHTML='<summary>Choose from all 128 hidden neurons</summary>';grid.replaceWith(detail);detail.append(grid);}
+  if(grid){const detail=document.createElement('section');detail.className='all-neurons';detail.innerHTML='<h4>Choose from all 128 hidden neurons</h4>';grid.replaceWith(detail);detail.append(grid);}
   const diagram=document.createElement('section');diagram.className='neuron-worked';
   diagram.innerHTML=`<div class="worked-heading"><div><span class="annotation-number">01</span><h4>Follow an actual connection</h4></div><label class="connection-control">Input index <input id="connection-index" type="number" min="0" max="${n-1}" value="${s.connection}"></label></div><div class="fan-scroll">${fanInSVG(input,weights,trace.total,bias,s.connection,target)}</div><div class="term-equation"><span class="term-reference">CONNECTION ${s.connection} → ${target}</span><span>${f(selected.input,5)}</span><span>×</span><span class="weight-ink">${f(selected.weight,5)}</span><span>=</span><strong>${f(selected.product,6)}</strong></div><div class="worked-heading"><div><span class="annotation-number">02</span><h4>See what pushes the score up or down</h4></div><p>Ten largest contributions; the rest are added together.</p></div>${contributionBars(groupedContributions(input,weights,10),bias)}<div class="bias-equation"><div><span class="context-label">SUM OF ${n} PRODUCTS</span><strong>${f(trace.subtotal,5)}</strong></div><span>+</span><div><span class="context-label">BIAS</span><strong>${f(bias,5)}</strong></div><span>=</span><div class="final-answer"><span class="context-label">PRE-ACTIVATION</span><strong>${f(trace.total,5)}</strong></div>${isLogit?'':`<span>→</span><div><span class="context-label">AFTER RELU</span><strong>${f(Math.max(0,trace.total),5)}</strong></div>`}</div>`;
   $('.work-toolbar',work).after(diagram);
@@ -137,16 +137,4 @@ export function enhancePooling(app) {
   const panel=document.createElement('section');panel.className='pool-routing';
   panel.innerHTML=`<div><p class="eyebrow">FORWARD VALUE / BACKWARD DERIVATIVE</p><h4>The winning position is remembered.</h4><p>If a gradient <i>g</i> arrives from the next layer, it returns only to position [${Math.floor(winner/2)}, ${winner%2}] inside this window.</p></div><div class="pool-switch">${values.map((v,i)=>`<div class="${i===winner?'winner':''}"><span>${f(v,4)}</span><small>${i===winner?'← receives g':'receives 0'}</small></div>`).join('')}</div><span class="routing-arrow">← <i>g</i></span>`;
   $('#lesson-work').append(panel);
-}
-
-export function enhanceLearning(app) {
-  const s=app.state; s.gradientNeuron=Math.min(127,s.gradientNeuron??0);
-  const neuron=s.gradientNeuron,classIndex=s.target;
-  const activation=s.tensors.hidden[neuron],probability=s.tensors.softmax[classIndex];
-  const index=classIndex*128+neuron,weight=s.weights.fc2Weight[index];
-  const chain=chainForOutputWeight(activation,probability,weight,true);
-  const panel=document.createElement('section');panel.className='chain-rule-worked';
-  panel.innerHTML=`<div class="worked-heading"><div><span class="annotation-number">∂</span><h4>Work out one weight’s gradient</h4></div><label>Hidden neuron <select id="gradient-neuron">${options(128,neuron)}</select></label></div><p class="math-note">Follow the weight connecting hidden neuron ${neuron} to the target digit ${classIndex}. Its gradient is a product of two local derivatives.</p><div class="chain-derivatives"><div><small>LOSS → LOGIT</small><span>∂L / ∂z = p − y</span><strong>${f(probability,6)} − 1 = ${f(chain.outputDerivative,6)}</strong></div><b>×</b><div><small>LOGIT → WEIGHT</small><span>∂z / ∂w = h</span><strong>${f(activation,6)}</strong></div><b>=</b><div class="gradient-answer"><small>LOSS → WEIGHT</small><span>∂L / ∂w</span><strong>${f(chain.weightGradient,6)}</strong></div></div><div class="weight-update-line"><span>Current weight <strong>${f(weight,6)}</strong></span><span>−</span><span>step size <strong>${s.rate}</strong></span><span>×</span><span>gradient <strong>${f(chain.weightGradient,6)}</strong></span><span>=</span><span>next weight <strong>${f(weight-s.rate*chain.weightGradient,6)}</strong></span></div><p class="math-note">This previews the next SGD update for this exact weight. “Take one gradient step” applies the same rule to all weights and biases. If h is zero, this connection’s weight gradient is zero.</p>`;
-  $('.learning-chain',$('#lesson-work')).before(panel);
-  $('#gradient-neuron').onchange=e=>{s.gradientNeuron=Number(e.target.value);app.lesson();};
 }

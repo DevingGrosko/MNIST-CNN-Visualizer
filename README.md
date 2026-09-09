@@ -12,12 +12,15 @@ Choose a real MNIST test example, draw a digit, or load a local image. Follow it
 - **12 lessons:** input normalization, Conv1, ReLU, max pooling, Conv2, ReLU, max pooling, flattening, dense/ReLU, logits, softmax, and learning.
 - **Worked convolution:** side-by-side input/filter/output diagrams, linked cell selections, a nine-term arithmetic replay, running totals, zero padding, bias, and an explicit eight-channel ledger for Conv2.
 - **Activation and pooling inspection:** before/after maps, a live ReLU function plot with local derivative, exact selected values, and a diagram of max-pool gradient routing.
-- **Worked classifier:** select any connection in a true-weight neuron diagram; compare signed contributions, including the aggregated remainder; expand all 128 neurons or every connection in a table. Four aligned softmax columns trace logits, shifting, exponentiation, and normalization.
+- **Worked classifier:** select any connection in a true-weight neuron diagram; compare signed contributions, including the aggregated remainder; see all 128 neurons and every connection in an open table. Four aligned softmax columns trace logits, shifting, exponentiation, and normalization.
 - **Real predictions:** 50 held-out MNIST examples (first five per label), freehand drawing, local image loading, pixel editing, and all ten probability scores.
-- **Learning:** inspect a numerical chain-rule product and the resulting update for a selected output weight; switch between initial and trained checkpoints; choose a label and learning rate; run real full-network backpropagation and one SGD update; inspect loss, gradients, and a changed weight. Updates are temporary. Reset restores the checkpoint.
+- **Training movie:** a twelve-scene forward/backward/update cycle with play, pause, single-scene stepping, and 0.5–4× speed. Start untrained, stop after one update, then play to ten or keep adding ten more. All gradients and SGD updates are real.
+- **Matrix wall:** eight first-layer kernels with numbers, all 128 second-layer kernel slices, complete dense/output weight textures, every bias, gradient matrices, and all feature-map channels. A wide view keeps the four trainable layers together. Gold highlights large changes in each panel.
+- **Exact update inspection:** click any parameter to inspect old weights, derivatives, signed changes, and new weights in four aligned numeric matrices. Inspect every spatial contribution to a convolution derivative or the actual dense-layer gradient product. Compare the same parameter before training, after one update, and after ten.
+- **Training playback:** repeat one image to make learning visible, or stream 200 genuine MNIST training examples. Review saved checkpoints without mutating the live model. Each update shows paired before/after loss for the same image. Checkpoints 0, 1, 10 and the latest 20 updates remain available; the next ten updates can be played indefinitely. Updates stay in memory until a reset or reload.
 - **Field guide:** detailed explanations of channels, receptive fields, weight sharing, training, numerical stability, and model limitations.
 
-The website uses a light paper/ink palette with red for positive values and blue for negative values. Black outlines indicate selection. The small network diagrams and six-connection dense diagrams show a subset of connections for legibility; all omitted contributions are still included in the calculated result. The inspector tables expose all connections for the selected neuron. Each heatmap rescales its color intensity independently; use numeric inspectors for comparisons. Matrices show rounded values while calculations retain full precision.
+The website uses a light paper/ink palette with red for positive values and blue for negative values. Black outlines indicate selection. The small network diagrams and six-connection dense diagrams show a subset of connections for legibility; all omitted contributions are still included in the calculated result. The inspector tables expose all connections for the selected neuron. The training movie holds each weight/activation scale fixed across the before/after pair; other heatmaps rescale independently. Use numeric inspectors for exact comparisons. Dense textures fit the whole matrix into the available space; click or use the flat-index selector to inspect any underlying cell. On narrow screens, the matrix wall scrolls horizontally. Matrices show rounded values while calculations retain full precision.
 
 ## Original architecture
 
@@ -69,12 +72,13 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/train_export.py --epochs 3
+python scripts/export_training_samples.py
 npm test
 ```
 
 The exporter imports the existing `Forward` class, downloads MNIST, trains, evaluates, and regenerates `web/assets/model.json`, `web/assets/samples.json`, and `tests/pytorch-reference.json`. No test images are used in that training run. The bundled samples are selected by test-set order, not by whether the model predicts them correctly.
 
-The browser learning sandbox uses single-image **SGD** so its update equation is easy to inspect; the exported checkpoint uses **Adam**. Sandbox updates to a test example are educational and invalidate the original accuracy measurement for that modified model. The UI labels modified weights accordingly. Changing the image or target restarts the displayed loss trace; modified weights persist until Reset or a checkpoint switch.
+The browser learning sandbox uses single-image **SGD** so its update equation is easy to inspect; the exported checkpoint uses **Adam**. Sandbox updates to a test example are educational and invalidate the original accuracy measurement for that modified model. The UI labels modified weights accordingly. Changing the image, target, training mode, or rate begins a new trace from the current weights. The movie’s Reset and Watch buttons restore random weights. The model switch restores the exported initial/trained weights. Timeline checkpoint buttons are read-only views and do not change the live run. The optional training stream is exported separately from the train split (first 20 examples of each label in dataset order), and is not used to measure test accuracy.
 
 This model recognizes handwritten digits only. Drawings and uploaded photos can differ from MNIST. A high softmax probability is not a guarantee or an out-of-distribution detector. Blank inputs are explicitly identified.
 
@@ -82,7 +86,7 @@ This model recognizes handwritten digits only. Drawings and uploaded photos can 
 
 `npm test` checks all intermediate forward tensors against independently computed PyTorch outputs for three test samples under both checkpoints. It also checks tensor dimensions, convolution padding and channel summation, pooling ties, extreme-logit numerical stability, parameter counts, and real loss reduction after an SGD step.
 
-Worked-visualization tests check that every convolution term and channel sum reconciles, signed dense contribution groups include the full dot product, all four softmax columns match inference, and the illustrated chain rule agrees with full backpropagation. Route tests cover all fourteen documents and repository-subpath resolution.
+Worked-visualization tests check that every convolution term and channel sum reconciles, signed dense contribution groups include the full dot product, all four softmax columns match inference, and the illustrated chain rule agrees with full backpropagation. Route tests cover all fourteen documents and repository-subpath resolution. Training tests check the commit boundary, ten-step equivalence to direct SGD, loss reduction, immutable checkpoint review, bounded snapshot retention, the training stream, and all 1,224 convolution-weight derivative sums plus representative derivatives from every bias/dense tensor. The Conv2 mosaic is checked for an exact, bijective mapping to all 1,152 weights. There are 28 numerical and route tests.
 
 The full backward pass is checked by central finite differences on weights and biases from every trainable tensor and selected input pixels. That test adds tiny deterministic perturbations to avoid ambiguous max-pool ties and uses a sufficiently small step to stay within the same activation region.
 
@@ -98,6 +102,9 @@ The optional WebMCP tools `inspect_cnn` and `explore_cnn_sample` are feature-det
 - `web/engine.js` — transparent inference, loss, backward pass, and SGD.
 - `web/lessons.js` — numerical inspectors and teaching content.
 - `web/math-views.js`, `web/math-trace.js` — linked mathematical diagrams and tested arithmetic records.
+- `web/training-session.js` — numerical training frames, checkpoints, gradient operands, and playback state.
+- `web/training-player.js`, `web/training.css` — the matrix wall, movie controls, and exact numeric inspectors.
+- `scripts/export_training_samples.py` — export the 200-image training stream.
 - `web/pages.js`, `scripts/pages.mjs` — chapter URLs and static page generation.
 - `web/app.js` — live input, drawing, state, and network rendering.
 - `web/render.js`, `web/guide.js`, `web/styles.css` — graphics, field guide, and responsive presentation.
