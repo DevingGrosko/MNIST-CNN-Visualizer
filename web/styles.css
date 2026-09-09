@@ -1,27 +1,29 @@
 :root {
   color-scheme: light;
-  --bg: #F7F1E9;
-  --surface: #FFFCF7;
-  --raised: #EDE2D6;
-  --line: #CFC0B1;
-  --line-soft: #E5DAD0;
-  --text: #26160C;
-  --muted: #685449;
-  --dim: #766052;
-  --accent: #8B322C;
-  --earth: #723715;
-  --positive: #8B322C;
-  --negative: #8381A6;
-  --positive-ink: #8B322C;
-  --negative-ink: #585578;
-  --positive-soft: #F3DFD3;
-  --negative-soft: #E8E5F0;
-  --selected: #EFCEBD;
-  --change: #D48662;
-  --change-ink: #723715;
-  --change-soft: #F2D2BF;
-  --neutral: #AB9686;
-  --neutral-dark: #786557;
+  --bg: #FFF7F2;
+  --surface: #FFFCFA;
+  --raised: #F0E2E0;
+  --line: #CFBBBF;
+  --line-soft: #E7D9DB;
+  --text: #283A53;
+  --muted: #60576B;
+  --dim: #6D597A;
+  --accent: #355070;
+  --earth: #6D597A;
+  --positive: #E56B6F;
+  --negative: #355070;
+  --positive-ink: #A23B45;
+  --negative-ink: #355070;
+  --positive-soft: #F8DDE0;
+  --negative-soft: #E4EAF1;
+  --selected: #F2CBB6;
+  --change: #EAAC8B;
+  --change-ink: #355070;
+  --change-soft: #F7D9C9;
+  --neutral: #B56576;
+  --neutral-dark: #6D597A;
+  --header: #355070;
+  --sidebar: #6D597A;
   --teal: var(--accent);
   --violet: var(--negative-ink);
   --orange: var(--earth);
@@ -569,11 +571,18 @@ body:not([data-page=overview]) #overview-page,body[data-page=overview] #lesson-p
 }
 
 .site-header nav { margin-left:auto; }
-/* Carry the Botanical palette into the framing on every lesson page. */
-.site-header { background:var(--text); border-top-color:var(--change); border-bottom-color:var(--earth); }
+/* Use the reference navy and muted purple across every lesson page. */
+.site-header { background:var(--header); border-top-color:var(--positive); border-bottom-color:var(--header); }
 .site-header .brand,.site-header .brand:hover { color:var(--surface); }
 .site-header .brand-comma,.site-header .brand-dot { color:var(--change); }
 .site-header nav a { color:var(--bg); }
-.site-header nav a:hover,.site-header nav a.active { color:var(--change); }
+.site-header nav a:hover,.site-header nav a.active { color:var(--change-soft); }
 .site-header nav a.active { box-shadow:0 1px var(--change); }
-.book-sidebar { background:var(--negative-soft); }
+.book-sidebar { background:var(--sidebar); color:var(--surface); }
+.book-sidebar .sidebar-label,.book-sidebar .toc-group,.book-sidebar .sidebar-foot,.book-sidebar .stage-button>span { color:var(--bg); }
+.book-sidebar .overview-link,.book-sidebar .notes-link,.book-sidebar .stage-button { color:var(--surface); }
+.book-sidebar .stage-button.selected,.book-sidebar .overview-link.active,.book-sidebar .notes-link.active { background:var(--change-soft); color:var(--header); border-color:var(--change); }
+.book-sidebar .stage-button.selected>span { color:var(--header); }
+.book-sidebar .notes-link { border-top-color:var(--neutral); }
+.book-sidebar a:hover { background:var(--change-soft); color:var(--header); }
+.book-sidebar .stage-button:hover>span { color:var(--header); }
