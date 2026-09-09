@@ -567,15 +567,5 @@ body:not([data-page=overview]) #overview-page,body[data-page=overview] #lesson-p
   .weight-update-line { justify-content: center; gap: 11px; }
   .weight-update-line strong { font-size: 14px; }
 }
-/* Two supplied palettes, compared on the same live calculations. */
-.palette-picker { display:flex; align-items:center; gap:12px; margin-left:auto; flex-shrink:0; }
-.palette-label { font:9px 'Courier New',monospace; letter-spacing:1px; color:var(--dim); }
-#palette-controls { display:flex; gap:6px; }
-#palette-controls button { display:flex; flex-direction:column; gap:5px; align-items:flex-start; padding:8px 10px; background:transparent; border:1px solid transparent; border-radius:2px; font-size:10px; color:var(--muted); }
-#palette-controls button[aria-pressed="true"] { border-color:var(--accent); background:var(--surface); color:var(--text); }
-.palette-swatches { display:flex; gap:2px; }
-.palette-swatches i { width:10px; height:10px; display:block; }
-.site-header { gap:25px; }
-@media(max-width:1150px) { .palette-label { display:none; }.site-header { height:auto; min-height:82px; flex-wrap:wrap; padding-block:12px; gap:12px 22px; }.site-header nav { gap:18px; }.site-header nav a { padding:10px 0; }.palette-picker { margin-left:0; } }
-@media(max-width:760px) { .site-header { display:flex; flex-direction:row; align-items:center; justify-content:space-between; }.site-header>.brand { font-size:23px; }.site-header nav { order:3; width:100%; justify-content:space-between; gap:8px; }.site-header nav a { font-size:12px; padding:6px 0; }.palette-picker { margin-left:auto; } }
-@media(max-width:430px) { .site-header>.brand { font-size:20px; gap:6px; }.site-header .brand img { width:25px; height:25px; }#palette-controls button { padding:6px; font-size:9px; }.palette-swatches i { width:8px; height:8px; }.site-header { gap:10px; padding-inline:15px; } }
+
+.site-header nav { margin-left:auto; }
