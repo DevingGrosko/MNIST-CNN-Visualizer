@@ -1,6 +1,6 @@
 import { PAGES, pageDocument } from './pages.mjs';
 import { rm, cp, readFile, writeFile } from 'node:fs/promises';
-for (const path of ['web/index.html','web/app.js','web/engine.js','web/styles.css','web/training.css','web/training-player.js','web/training-session.js','web/assets/training-samples.json','web/assets/model.json','web/assets/samples.json']) await readFile(path);
+for (const path of ['web/index.html','web/app.js','web/palette.js','web/engine.js','web/styles.css','web/training.css','web/training-player.js','web/training-session.js','web/assets/training-samples.json','web/assets/model.json','web/assets/samples.json']) await readFile(path);
 const data = JSON.parse(await readFile('web/assets/model.json', 'utf8'));
 if (data.trained.fc1Weight.length !== 784 * 128) throw new Error('Invalid model weights');
 await rm('dist', {recursive:true, force:true});

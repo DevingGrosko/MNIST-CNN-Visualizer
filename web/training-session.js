@@ -11,7 +11,7 @@ export const PHASES = [
   {id:'back-dense', title:'Send error through the dense matrix', column:'fc1', direction:'backward', caption:'Multiply the incoming gradient by each input feature. ReLU blocks gradients where the pre-activation was nonpositive.'},
   {id:'back-conv2', title:'Send error through the second filters', column:'conv2', direction:'backward', caption:'Pooling routes gradients to its saved maxima. Every shared filter weight adds gradient contributions from all its spatial positions.'},
   {id:'back-conv1', title:'Send error through the first filters', column:'conv1', direction:'backward', caption:'The chain rule reaches the first eight filters. Each cell now has a derivative telling us how to change its weight.'},
-  {id:'update', title:'Change every weight and bias', column:'all', direction:'update', caption:'New weight = old weight − learning rate × gradient. Outlined cells are changing; gold marks the largest changes in each panel.'},
+  {id:'update', title:'Change every weight and bias', column:'all', direction:'update', caption:'New weight = old weight − learning rate × gradient. Outlined cells are changing; a warm flash marks the largest changes in each panel.'},
   {id:'result', title:'Predict again with the new matrices', column:'all', direction:'result', caption:'The same image passes through the updated network. Compare its loss and probability before and after this single update.'},
 ];
 export const WEIGHT_LAYOUTS = {

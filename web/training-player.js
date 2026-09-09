@@ -1,3 +1,4 @@
+import { getPalette, signedRGB, inkOn } from './palette.js';
 import { loss } from './engine.js';
 import { TrainingSession, PHASES, WEIGHT_LAYOUTS, gradientTerms, conv2MosaicIndex, conv2WeightIndex } from './training-session.js';
 import { $, $$, f, pct, heatmap, color } from './render.js';
@@ -92,25 +93,25 @@ function paintRect(canvas,values,rows,cols,{domain,changes,flash=false,selected=
   const context=canvas.getContext('2d'),image=context.createImageData(cols,rows),max=domain||rangeMaximum(values);
   const maxChange=changes?rangeMaximum(changes):1;
   for(let index=0;index<values.length;index++){
-    const t=Math.min(1,Math.abs(values[index])/max),base=[245,243,237],end=values[index]<0?[49,93,125]:[166,59,50];
-    const rgb=flash&&changes&&Math.abs(changes[index])>maxChange*.35?[221,168,49]:base.map((v,i)=>Math.round(v+(end[i]-v)*t));
+    const rgb=flash&&changes&&Math.abs(changes[index])>maxChange*.35?getPalette().rgb.change:signedRGB(values[index],max);
     image.data.set([...rgb,255],index*4);
   }
   context.putImageData(image,0,0);
-  if(selected>=0){context.fillStyle='#181714';context.fillRect(selected%cols,Math.floor(selected/cols),1,1);}
+  if(selected>=0){context.fillStyle=getPalette().colors.text;context.fillRect(selected%cols,Math.floor(selected/cols),1,1);}
 }
 function paintKernel(canvas,values,{domain,changes,flash,selected}) {
   canvas.width=180;canvas.height=180;
   const context=canvas.getContext('2d'),maxChange=changes?rangeMaximum(changes):1;
   for(let i=0;i<9;i++) {
     const row=Math.floor(i/3),col=i%3;
-    context.fillStyle=flash&&changes&&Math.abs(changes[i])>maxChange*.35?'#dda831':color(values[i],domain);
+    const cellColor=flash&&changes&&Math.abs(changes[i])>maxChange*.35?getPalette().rgb.change:signedRGB(values[i],domain);
+    context.fillStyle=`rgb(${cellColor.join(',')})`;
     context.fillRect(col*60,row*60,60,60);
-    context.strokeStyle='#d0c9bb';context.lineWidth=1;context.strokeRect(col*60,row*60,60,60);
-    context.fillStyle=Math.abs(values[i])/domain>.6&&!flash?'#fffefa':'#292622';
+    context.strokeStyle=getPalette().colors.line;context.lineWidth=1;context.strokeRect(col*60,row*60,60,60);
+    context.fillStyle=inkOn(cellColor);
     context.font='24px monospace';context.textAlign='center';context.textBaseline='middle';
     context.fillText(f(values[i],2),col*60+30,row*60+31);
-    if(i===selected){context.strokeStyle='#181714';context.lineWidth=5;context.strokeRect(col*60+3,row*60+3,54,54);}
+    if(i===selected){context.strokeStyle=getPalette().colors.text;context.lineWidth=5;context.strokeRect(col*60+3,row*60+3,54,54);}
   }
 }
 function wireRect(canvas,rows,cols,key,app,player) {
@@ -167,7 +168,7 @@ export function renderTrainingMovie(app) {
     <div class="movie-status" role="status">${player.error||player.notice}</div>
     <div class="update-scorecard">${frame&&(display.phase==='update'||display.phase==='result')?`<span><strong>${frame.changed.toLocaleString()}</strong> parameters changed</span><span>Loss <strong>${f(frame.beforeLoss,4)} → ${f(frame.afterLoss,4)}</strong></span><span>p(${correct}) <strong>${pct(frame.before.softmax[correct])} → ${pct(frame.after.softmax[correct])}</strong></span>`:'<span>One full cycle: predict → measure error → backpropagate → update → predict again.</span>'}</div>
     <div class="movie-wall">${Object.keys(WEIGHT_LAYOUTS).map(key=>weightPanel(key,player,display)).join('')}</div>
-    <div class="wall-legend"><span><i class="positive-swatch"></i> Positive</span><span><i class="negative-swatch"></i> Negative</span><span><i class="change-swatch"></i> Largest changes in this update</span><span>All channels are shown. Click a matrix to magnify its numbers.</span></div>
+    <div class="wall-legend"><span><i class="positive-swatch"></i> Positive · ${getPalette().positiveName.toLowerCase()}</span><span><i class="negative-swatch"></i> Negative · ${getPalette().negativeName.toLowerCase()}</span><span><i class="change-swatch"></i> ${getPalette().changeName} flash · largest changes</span><span>All channels are shown. Click a matrix to magnify its numbers.</span></div>
     <section id="movie-inspector" class="movie-inspector"></section>
     <section class="movie-timeline"><div class="worked-heading"><div><span class="annotation-number">↔</span><h4>Compare before training, after 1, after 10.</h4></div><button class="text-button" id="movie-live">Return to live run</button></div><div class="movie-checkpoints">${checkpoints.map(number=>`<button data-checkpoint="${number}" class="${session.review?.number===number?'selected':''}"><small>${number===0?'START':number===1?'FIRST UPDATE':number===10?'TEN UPDATES':'UPDATE'}</small><strong>${number}</strong></button>`).join('')}</div><div id="movie-loss-history"></div><p class="movie-footnote">Each update is real single-image SGD, run in your browser. One update is not an epoch. ${player.mode==='repeat'?'Repeating one image makes its learning easy to see; it does not measure general digit accuracy.':'The stream cycles through 200 MNIST training images. Each loss pair compares the same image before and after its update.'} Checkpoints 0, 1, 10 and the latest 20 updates are retained.</p></section>
   </div>`;
@@ -263,7 +264,7 @@ function renderGradientRecipe(app,player,ready) {
   const node=$('#gradient-recipe');
   if(!ready){node.innerHTML='<p>The backward pass will reveal where this gradient comes from. Use Next scene to follow it one stage at a time.</p>';return;}
   const terms=gradientTerms(display.frame,key,index),term=Math.min(player.term||0,terms.products.length-1);
-  node.innerHTML=`<div><h4>Where did this gradient come from?</h4><p>${terms.note}</p>${terms.size>1?`<canvas id="gradient-contributions" role="img" tabindex="0" aria-label="Every spatial contribution to this weight gradient. Click a cell or use arrow keys."></canvas><span class="contribution-caption">${terms.size} × ${terms.size} local products · click a position</span>`:''}</div><div class="gradient-arithmetic"><span class="context-label">${terms.size>1?'AT OUTPUT POSITION ['+Math.floor(term/terms.size)+', '+term%terms.size+']':'ONE CONNECTION'}</span><div class="operand-pair"><div><small>${terms.leftLabel}</small><strong>${exact(terms.left[term])}</strong></div><b>×</b><div><small>${terms.rightLabel}</small><strong>${exact(terms.right[term])}</strong></div></div><div class="gradient-product">= ${exact(terms.products[term])}</div><div class="gradient-total"><span>${terms.size>1?'Sum of all '+terms.products.length+' products':'Weight gradient'}</span><strong>${exact(terms.total)}</strong></div><p>${terms.size>1?'Blue and red contributions can cancel. Padding contributes zero.':'This value enters the update equation above.'}</p></div>`;
+  node.innerHTML=`<div><h4>Where did this gradient come from?</h4><p>${terms.note}</p>${terms.size>1?`<canvas id="gradient-contributions" role="img" tabindex="0" aria-label="Every spatial contribution to this weight gradient. Click a cell or use arrow keys."></canvas><span class="contribution-caption">${terms.size} × ${terms.size} local products · click a position</span>`:''}</div><div class="gradient-arithmetic"><span class="context-label">${terms.size>1?'AT OUTPUT POSITION ['+Math.floor(term/terms.size)+', '+term%terms.size+']':'ONE CONNECTION'}</span><div class="operand-pair"><div><small>${terms.leftLabel}</small><strong>${exact(terms.left[term])}</strong></div><b>×</b><div><small>${terms.rightLabel}</small><strong>${exact(terms.right[term])}</strong></div></div><div class="gradient-product">= ${exact(terms.products[term])}</div><div class="gradient-total"><span>${terms.size>1?'Sum of all '+terms.products.length+' products':'Weight gradient'}</span><strong>${exact(terms.total)}</strong></div><p>${terms.size>1?'Positive and negative contributions can cancel. Padding contributes zero.':'This value enters the update equation above.'}</p></div>`;
   if(terms.size>1) {
     const canvas=$('#gradient-contributions');heatmap(canvas,terms.products,terms.size,{x:term%terms.size,y:Math.floor(term/terms.size)});
     const select=position=>{pauseTrainingMovie(app);player.term=position;app.lesson();$('#gradient-contributions').focus({preventScroll:true});};

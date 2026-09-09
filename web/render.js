@@ -1,3 +1,4 @@
+import { signedRGB, getPalette } from './palette.js';
 export const $ = (s, root=document)=>root.querySelector(s);
 export const $$ = (s, root=document)=>Array.from(root.querySelectorAll(s));
 export const f = (v,d=3)=>Math.abs(v)<0.5*10**(-d)?(0).toFixed(d):Number(v).toFixed(d);
@@ -5,8 +6,7 @@ export const pct = v=>(100*v).toFixed(v>=.9995?2:1)+'%';
 export const esc = value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function color(value,max=1,gray=false) {
   if(gray){const v=Math.round(Math.max(0,Math.min(1,value))*235+8);return `rgb(${v},${v+Math.round((255-v)*.012)},${v+Math.round((255-v)*.035)})`;}
-  const t=Math.min(1,Math.abs(value)/(max||1)),base=[245,243,237],end=value<0?[49,93,125]:[166,59,50];
-  return `rgb(${base.map((b,i)=>Math.round(b+(end[i]-b)*t)).join(',')})`;
+  return `rgb(${signedRGB(value,max).join(',')})`;
 }
 export function heatmap(canvas,data,n,{gray=false,x,y,patch=false,region=1}={}) {
   if(!canvas)return;
@@ -14,7 +14,7 @@ export function heatmap(canvas,data,n,{gray=false,x,y,patch=false,region=1}={}) 
   const max=data.reduce((m,v)=>Math.max(m,Math.abs(v)),0);
   for(let row=0;row<n;row++)for(let col=0;col<n;col++) {c.fillStyle=color(data[row*n+col],max,gray);c.fillRect(col*scale,row*scale,scale,scale);}
   if(Number.isInteger(x)&&Number.isInteger(y)) {
-    c.strokeStyle='#171717';c.lineWidth=1.6;
+    c.strokeStyle=getPalette().colors.text;c.lineWidth=1.6;
     const startX=patch?Math.max(0,x-1):x,startY=patch?Math.max(0,y-1):y;
     const endX=patch?Math.min(n,x+2):Math.min(n,x+region),endY=patch?Math.min(n,y+2):Math.min(n,y+region);
     c.strokeRect(startX*scale+.8,startY*scale+.8,(endX-startX)*scale-1.6,(endY-startY)*scale-1.6);
