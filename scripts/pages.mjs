@@ -1,8 +1,9 @@
+import { versionDocumentAssets } from './assets.mjs';
 import { PAGES } from '../web/pages.js';
 export { PAGES };
 const escape = text => text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
-export function pageDocument(template, page) {
-  return template
+export function pageDocument(template, page, {assetRoot='.'}={}) {
+  return versionDocumentAssets(template,assetRoot)
     .replace(/<title>.*?<\/title>/, `<title>${escape(page.label)} — CNN, Explained</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escape(page.deck)}">`)
     .replace('<body data-page="overview">', `<body data-page="${page.id}">`)

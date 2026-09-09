@@ -66,7 +66,7 @@ async function newRun(app,player,{untrained=false}={}) {
   const request=player.request=(player.request||0)+1;
   if(player.mode==='stream'&&!trainingData){
     player.loading=true;player.notice='Loading 200 examples from the MNIST training split…';app.lesson();
-    const response=await fetch('./assets/training-samples.json');
+    const response=await fetch(new URL('./assets/training-samples.json',import.meta.url));
     if(!response.ok)throw new Error('Training examples could not be loaded. Try the repeated-image mode.');
     const data=await response.json();
     if(data.split!=='train'||!Array.isArray(data.samples))throw new Error('Invalid training stream.');

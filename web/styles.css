@@ -569,3 +569,11 @@ body:not([data-page=overview]) #overview-page,body[data-page=overview] #lesson-p
 }
 
 .site-header nav { margin-left:auto; }
+/* Carry the Botanical palette into the framing on every lesson page. */
+.site-header { background:var(--text); border-top-color:var(--change); border-bottom-color:var(--earth); }
+.site-header .brand,.site-header .brand:hover { color:var(--surface); }
+.site-header .brand-comma,.site-header .brand-dot { color:var(--change); }
+.site-header nav a { color:var(--bg); }
+.site-header nav a:hover,.site-header nav a.active { color:var(--change); }
+.site-header nav a.active { box-shadow:0 1px var(--change); }
+.book-sidebar { background:var(--negative-soft); }
