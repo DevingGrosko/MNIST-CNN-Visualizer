@@ -14,3 +14,7 @@ data/
 *.jpg
 *.jpeg
 
+
+# Website build output
+node_modules/
+dist/
